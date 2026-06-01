@@ -18,6 +18,12 @@ describe("cli help", () => {
       "--grove-api-mode",
       "--grove-api-key",
       "--memongo-base-url",
+      "--memongo-api-key",
+      "--memongo-enrichment-mode",
+      "--memongo-enrichment-model",
+      "--memongo-query-decomposition-mode",
+      "--memongo-repo",
+      "--memongo-commit",
       "--mongodb-uri",
     ]) {
       expect(help).toContain(flag);

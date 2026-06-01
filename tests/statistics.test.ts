@@ -3,13 +3,13 @@ import { buildStatisticsReport } from "../src/report/statistics";
 import type { RunResult } from "../src/types";
 
 describe("statistics report", () => {
-  test("pairs filesystem and MongoDB runs by task, size, and repetition", () => {
+  test("pairs filesystem and memongo runs by task, size, and repetition", () => {
     const report = buildStatisticsReport(
       [
         run("q1", "filesystem", 10, 1, 0.03),
-        run("q1", "mongodb", 10, 1, 0.01),
+        run("q1", "memongo-context", 10, 1, 0.01),
         run("q1", "filesystem", 10, 2, 0.04),
-        run("q1", "mongodb", 10, 2, 0.02),
+        run("q1", "memongo-context", 10, 2, 0.02),
       ],
       [],
     );
@@ -17,7 +17,9 @@ describe("statistics report", () => {
     expect(report.pairedDeltas).toHaveLength(1);
     expect(report.pairedDeltas[0]?.pairedRuns).toBe(2);
     expect(report.pairedDeltas[0]?.meanCostDeltaUsd).toBeCloseTo(0.02);
-    expect(report.backendSummaries.find((row) => row.backend === "mongodb")?.p95CostUsd).toBe(0.02);
+    expect(
+      report.backendSummaries.find((row) => row.backend === "memongo-context")?.p95CostUsd,
+    ).toBe(0.02);
   });
 });
 

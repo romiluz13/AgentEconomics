@@ -59,7 +59,7 @@ export function buildStatisticsReport(
     backendSummaries: backendSummaries(results),
     pairedDeltas: pairedDeltas(results),
     notes: [
-      "Paired deltas compare filesystem minus MongoDB for matching task, corpus size, and repetition.",
+      "Paired deltas compare filesystem minus the preferred non-filesystem backend for matching task, corpus size, and repetition.",
       "Bootstrap confidence intervals use deterministic resampling of paired deltas.",
       "Avoided cost per 1M successful tasks is a linear extrapolation from observed paired costs.",
     ],
@@ -116,36 +116,58 @@ function backendSummaries(results: RunResult[]): BackendStatistics[] {
 function pairedDeltas(results: RunResult[]): PairedDeltaStatistics[] {
   const bySize = groupBy(results, (run) => String(run.corpusSize));
   return [...bySize.entries()]
-    .map(([size, runs]) => {
-      const pairs = pairRuns(runs, "filesystem", "mongodb");
-      const costDeltas = pairs.map((pair) => pair.baseline.costUsd - pair.candidate.costUsd);
-      const candidateCosts = pairs.map((pair) => pair.candidate.costUsd);
-      const baselineCosts = pairs.map((pair) => pair.baseline.costUsd);
-      const successPairs = pairs.filter((pair) => pair.baseline.correct || pair.candidate.correct);
-      return {
-        corpusSize: Number(size),
-        baselineBackend: "filesystem" as const,
-        candidateBackend: "mongodb" as const,
-        pairedRuns: pairs.length,
-        meanCostDeltaUsd: mean(costDeltas),
-        medianCostDeltaUsd: quantile(costDeltas, 0.5),
-        bootstrap95CiUsd: bootstrapMeanCi(costDeltas, Number(size)),
-        meanCostRatio: safeDivide(mean(baselineCosts), mean(candidateCosts)),
-        meanInputTokenDelta: mean(
-          pairs.map((pair) => pair.baseline.totalInputTokens - pair.candidate.totalInputTokens),
-        ),
-        meanLatencyDeltaMs: mean(
-          pairs.map((pair) => pair.baseline.latencyMs - pair.candidate.latencyMs),
-        ),
-        accuracyDelta:
-          mean(pairs.map((pair) => (pair.candidate.correct ? 1 : 0))) -
-          mean(pairs.map((pair) => (pair.baseline.correct ? 1 : 0))),
-        avoidedCostPer1MSuccessfulTasksUsd:
-          successPairs.length === 0 ? null : mean(costDeltas) * 1_000_000,
-      };
+    .flatMap(([size, runs]) => {
+      const candidates = candidateBackends(runs);
+      return candidates.map((candidateBackend) =>
+        buildPairedDelta(Number(size), runs, candidateBackend),
+      );
     })
     .filter((row) => row.pairedRuns > 0)
-    .sort((left, right) => left.corpusSize - right.corpusSize);
+    .sort((left, right) =>
+      left.corpusSize === right.corpusSize
+        ? left.candidateBackend.localeCompare(right.candidateBackend)
+        : left.corpusSize - right.corpusSize,
+    );
+}
+
+function buildPairedDelta(
+  corpusSize: number,
+  runs: RunResult[],
+  candidateBackend: BackendId,
+): PairedDeltaStatistics {
+  const pairs = pairRuns(runs, "filesystem", candidateBackend);
+  const costDeltas = pairs.map((pair) => pair.baseline.costUsd - pair.candidate.costUsd);
+  const candidateCosts = pairs.map((pair) => pair.candidate.costUsd);
+  const baselineCosts = pairs.map((pair) => pair.baseline.costUsd);
+  const successPairs = pairs.filter((pair) => pair.baseline.correct || pair.candidate.correct);
+  return {
+    corpusSize,
+    baselineBackend: "filesystem" as const,
+    candidateBackend,
+    pairedRuns: pairs.length,
+    meanCostDeltaUsd: mean(costDeltas),
+    medianCostDeltaUsd: quantile(costDeltas, 0.5),
+    bootstrap95CiUsd: bootstrapMeanCi(costDeltas, corpusSize),
+    meanCostRatio: safeDivide(mean(baselineCosts), mean(candidateCosts)),
+    meanInputTokenDelta: mean(
+      pairs.map((pair) => pair.baseline.totalInputTokens - pair.candidate.totalInputTokens),
+    ),
+    meanLatencyDeltaMs: mean(
+      pairs.map((pair) => pair.baseline.latencyMs - pair.candidate.latencyMs),
+    ),
+    accuracyDelta:
+      mean(pairs.map((pair) => (pair.candidate.correct ? 1 : 0))) -
+      mean(pairs.map((pair) => (pair.baseline.correct ? 1 : 0))),
+    avoidedCostPer1MSuccessfulTasksUsd:
+      successPairs.length === 0 ? null : mean(costDeltas) * 1_000_000,
+  };
+}
+
+function candidateBackends(runs: RunResult[]): BackendId[] {
+  const present = new Set(runs.map((run) => run.backend));
+  return (["memongo-context", "memongo-search", "mongodb-text"] as BackendId[]).filter((backend) =>
+    present.has(backend),
+  );
 }
 
 function summarizeFailures(results: RunResult[], failures: FailureRecord[]): FailureSummary[] {

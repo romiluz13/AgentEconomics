@@ -1,69 +1,24 @@
 import { type Collection, MongoClient } from "mongodb";
 import { estimateTokens } from "../agent/tokenizer";
 import type { Corpus, PricingTable } from "../types";
-import { MemongoHttpClient } from "./memongo-http";
 import type { Backend, BackendRunContext, ToolDefinition, ToolExecutionResult } from "./types";
 
-export interface MongoDbBackendOptions {
-  memongoBaseUrl?: string;
+export interface MongoDbTextBackendOptions {
   mongodbUri: string;
   pricing: PricingTable;
 }
 
-export class MongoDbBackend implements Backend {
-  readonly id = "mongodb" as const;
-  private readonly memongoClient?: MemongoHttpClient;
+export class MongoDbTextBackend implements Backend {
+  readonly id = "mongodb-text" as const;
   private readonly mongodbUri: string;
   private readonly pricing: PricingTable;
 
-  constructor(options: MongoDbBackendOptions) {
-    this.memongoClient = options.memongoBaseUrl
-      ? new MemongoHttpClient({ baseUrl: options.memongoBaseUrl })
-      : undefined;
+  constructor(options: MongoDbTextBackendOptions) {
     this.mongodbUri = options.mongodbUri;
     this.pricing = options.pricing;
   }
 
   async setup(corpus: Corpus): Promise<BackendRunContext> {
-    if (!this.memongoClient) return this.setupDirectMongo(corpus);
-
-    const agentId = `agent-economics-${corpus.id}-${Date.now()}`;
-    let ingestedTokens = 0;
-
-    await this.memongoClient.status();
-    for (const session of corpus.sessions) {
-      for (const turn of session.turns) {
-        ingestedTokens += estimateTokens(turn.content);
-        await this.memongoClient.writeEvent({
-          agentId,
-          sessionId: session.id,
-          role: turn.role,
-          content: turn.content,
-          timestamp: turn.timestamp,
-          metadata: {
-            benchmark: "agent-economics",
-            corpusId: corpus.id,
-            sourceQuestionIds: session.sourceQuestionIds,
-          },
-        });
-      }
-    }
-    await this.memongoClient.sync(agentId);
-
-    return {
-      backend: this.id,
-      corpus,
-      tools: [this.searchTool(agentId)],
-      ingestionCost: {
-        tokens: ingestedTokens,
-        costUsd: (ingestedTokens / 1_000_000) * this.pricing.voyageEmbedPerMTok,
-        notes: "Estimated embedding ingestion cost, reported separately from per-task inference.",
-      },
-      teardown: async () => {},
-    };
-  }
-
-  private async setupDirectMongo(corpus: Corpus): Promise<BackendRunContext> {
     const client = new MongoClient(this.mongodbUri, {
       connectTimeoutMS: 10_000,
       serverSelectionTimeoutMS: 10_000,
@@ -108,34 +63,6 @@ export class MongoDbBackend implements Backend {
       teardown: async () => {
         await collection.drop().catch(() => undefined);
         await client.close();
-      },
-    };
-  }
-
-  private searchTool(agentId: string): ToolDefinition {
-    return {
-      name: "search_memory",
-      description: "Search MongoDB/memongo memory for relevant context.",
-      parameters: {
-        type: "object",
-        properties: {
-          query: { type: "string", description: "Natural-language search query." },
-          limit: { type: "number", description: "Maximum number of memory chunks to retrieve." },
-        },
-        required: ["query"],
-        additionalProperties: false,
-      },
-      execute: async (args) => {
-        const query = stringArg(args, "query");
-        const limit = numberArg(args, "limit", 5);
-        if (!this.memongoClient) throw new Error("memongo client is not configured.");
-        const result = await this.memongoClient.searchDetailed({
-          agentId,
-          query,
-          limit,
-          searchMode: "agentic",
-        });
-        return jsonResult(result);
       },
     };
   }

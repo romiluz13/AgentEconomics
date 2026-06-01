@@ -1,7 +1,7 @@
 {
   "backends": [
     "filesystem",
-    "mongodb"
+    "memongo-context"
   ],
   "sizes": [
     10,
@@ -12,15 +12,20 @@
   ],
   "tasks": 20,
   "repetitions": 3,
-  "maxCostUsd": 250,
+  "maxCostUsd": 275,
   "dryRunEstimate": false,
   "model": "gpt-5.5",
   "judgeModel": "gpt-5.5",
   "loopBudget": 10,
   "outDir": "./artifacts",
-  "runId": "longmem-final-gpt55",
+  "runId": "memongo-enriched-final-gpt55-complete",
   "seed": 42,
   "pricingPath": "./pricing.json",
+  "memongoEnrichmentMode": "enabled",
+  "memongoEnrichmentModel": "DeepSeek-V4-Pro",
+  "memongoRepo": "https://github.com/romiluz13/Memongo",
+  "memongoCommit": "a17e2bf32bbcace90537739fdc46db48fe4dc917",
+  "memongoQueryDecompositionMode": "enabled",
   "groveAuthHeader": "api-key",
   "groveApiMode": "responses",
   "demo": false,
@@ -28,6 +33,7 @@
   "datasetPathConfigured": true,
   "groveApiKeyConfigured": true,
   "groveBaseUrlConfigured": true,
-  "memongoBaseUrlConfigured": false,
+  "memongoApiKeyConfigured": false,
+  "memongoBaseUrlConfigured": true,
   "mongodbUriConfigured": true
 }

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { createMockChatProvider } from "../src/agent/grove";
 import { runAgentLoop } from "../src/agent/loop";
-import { MongoDbBackend } from "../src/backends/mongodb";
+import { MongoDbTextBackend } from "../src/backends/mongodb";
 import type { BackendRunContext } from "../src/backends/types";
 import { buildCorpus, selectStratifiedTasks } from "../src/dataset/corpus";
 import { parseLongMemEval } from "../src/dataset/longmemeval";
@@ -20,7 +20,7 @@ describe("direct MongoDB backend", () => {
     const task = tasks[0];
     if (!task) throw new Error("Expected at least one selected task.");
 
-    const backend = new MongoDbBackend({
+    const backend = new MongoDbTextBackend({
       mongodbUri: process.env.MONGODB_URI ?? "mongodb://127.0.0.1:27017/agent-economics-test",
       pricing,
     });
@@ -34,7 +34,7 @@ describe("direct MongoDB backend", () => {
 
     try {
       const loop = await runAgentLoop({
-        backend: "mongodb",
+        backend: "mongodb-text",
         task,
         tools: context.tools,
         provider: createMockChatProvider(task),

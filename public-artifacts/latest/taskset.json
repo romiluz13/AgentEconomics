@@ -1,5 +1,5 @@
 {
-  "runId": "longmem-final-gpt55",
+  "runId": "memongo-enriched-final-gpt55-complete",
   "seed": 42,
   "taskCount": 20,
   "tasks": [

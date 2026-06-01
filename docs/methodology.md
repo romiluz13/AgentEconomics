@@ -7,7 +7,8 @@ AgentEconomics measures cost per completed correct outcome, not raw token usage.
 - Same task set, corpus seed, model, Grove API mode, loop budget, and judge for every backend.
 - Same LongMemEval-S source file is used locally; the raw dataset is never committed.
 - Grove Responses requests use `store: false` and no temperature for `gpt-5.5` because the endpoint rejects temperature.
-- MongoDB Docker runs are described as MongoDB indexed retrieval, not Atlas Vector Search.
+- `memongo-context` runs are described as external memongo context management over HTTP.
+- `mongodb-text` is a naive direct MongoDB text-index baseline and is never labeled as memongo.
 
 ## Measurement
 

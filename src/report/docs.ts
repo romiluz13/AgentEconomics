@@ -11,7 +11,8 @@ export function renderMethodologyDoc(): string {
     "- Same task set, corpus seed, model, Grove API mode, loop budget, and judge for every backend.",
     "- Same LongMemEval-S source file is used locally; the raw dataset is never committed.",
     "- Grove Responses requests use `store: false` and no temperature for `gpt-5.5` because the endpoint rejects temperature.",
-    "- MongoDB Docker runs are described as MongoDB indexed retrieval, not Atlas Vector Search.",
+    "- `memongo-context` runs are described as external memongo context management over HTTP.",
+    "- `mongodb-text` is a naive direct MongoDB text-index baseline and is never labeled as memongo.",
     "",
     "## Measurement",
     "",
@@ -31,14 +32,18 @@ export function renderReproduceDoc(runId: string): string {
     "",
     "```bash",
     "bun install",
-    "bun run benchmark -- demo --backend filesystem,mongodb --run-id synthetic-smoke",
+    "bun run benchmark -- demo --backend filesystem,memongo-context --memongo-base-url http://127.0.0.1:3847 --run-id synthetic-smoke",
     "```",
+    "",
+    "## Memongo Sidecar",
+    "",
+    "Run memongo from a pinned checkout before live benchmarks. AgentEconomics talks to it only through `MEMONGO_BASE_URL` and does not vendor or modify memongo source.",
     "",
     "## Full Benchmark",
     "",
     "```bash",
     "bun run benchmark -- \\",
-    "  --backend filesystem,mongodb \\",
+    "  --backend filesystem,memongo-context \\",
     "  --sizes 10,50,100,300,500 \\",
     "  --tasks 20 \\",
     "  --repetitions 3 \\",
@@ -48,7 +53,12 @@ export function renderReproduceDoc(runId: string): string {
     "  --grove-auth-header api-key \\",
     "  --loop-budget 10 \\",
     "  --dataset /path/to/longmemeval_s_cleaned.json \\",
-    "  --mongodb-uri mongodb://127.0.0.1:27017/agent-economics \\",
+    "  --memongo-base-url http://127.0.0.1:3847 \\",
+    "  --memongo-enrichment-mode enabled \\",
+    "  --memongo-query-decomposition-mode enabled \\",
+    "  --memongo-enrichment-model DeepSeek-V4-Pro \\",
+    "  --memongo-repo https://github.com/romiluz13/Memongo \\",
+    "  --memongo-commit <pinned-commit> \\",
     `  --run-id ${runId}`,
     "```",
     "",
@@ -64,14 +74,16 @@ export function renderResultsDoc(statistics: StatisticsReport): string {
     ? statistics.backendSummaries.filter((row) => row.corpusSize === largest.corpusSize)
     : [];
   const filesystem = largestSummaries.find((row) => row.backend === "filesystem");
-  const mongodb = largestSummaries.find((row) => row.backend === "mongodb");
+  const candidate = largest
+    ? largestSummaries.find((row) => row.backend === largest.candidateBackend)
+    : undefined;
   return [
     "# Results",
     "",
     "Same task. Same model. Different memory architecture.",
     "",
     largest
-      ? `At N=${largest.corpusSize}, the paired mean filesystem minus MongoDB cost delta was $${largest.meanCostDeltaUsd.toFixed(
+      ? `At N=${largest.corpusSize}, the paired mean filesystem minus ${largest.candidateBackend} cost delta was $${largest.meanCostDeltaUsd.toFixed(
           6,
         )} per run.`
       : "No paired filesystem/MongoDB results are available yet.",
@@ -80,8 +92,8 @@ export function renderResultsDoc(statistics: StatisticsReport): string {
           largest.avoidedCostPer1MSuccessfulTasksUsd ?? 0
         ).toFixed(0)} per 1M successful tasks.`
       : "",
-    filesystem && mongodb
-      ? `Accuracy at the largest measured N was ${(filesystem.accuracy * 100).toFixed(1)}% for filesystem and ${(mongodb.accuracy * 100).toFixed(1)}% for MongoDB indexed retrieval.`
+    filesystem && candidate
+      ? `Accuracy at the largest measured N was ${(filesystem.accuracy * 100).toFixed(1)}% for filesystem and ${(candidate.accuracy * 100).toFixed(1)}% for ${largest?.candidateBackend}.`
       : "",
     "",
     "## Visuals",
@@ -98,6 +110,6 @@ export function renderResultsDoc(statistics: StatisticsReport): string {
     "",
     "## Current Limitation",
     "",
-    "The checked-in public artifact is the final `longmem-final-gpt55` run. Claims should reference the exact run ID and matrix in `public-artifacts/latest/run-manifest.json`, including the observed accuracy tradeoff and recorded timeout/loop-budget failures.",
+    "The checked-in public artifact is the final memongo enriched run. Claims should reference the exact run ID and matrix in `public-artifacts/latest/run-manifest.json`, including the observed accuracy tradeoff and recorded timeout/loop-budget/provider failures.",
   ].join("\n");
 }

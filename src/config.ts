@@ -15,7 +15,7 @@ export function parseArgs(argv: string[]): BenchmarkConfig {
 
   const hasFlag = (name: string): boolean => args.includes(name);
   const backends = parseBackends(
-    getValue("--backend") ?? (demo ? "filesystem" : "filesystem,mongodb"),
+    getValue("--backend") ?? (demo ? "filesystem" : "filesystem,memongo-context"),
   );
   const model = getValue("--model") ?? process.env.GROVE_MODEL ?? (demo ? "mock-agent" : "gpt-5.5");
   const mockModel = demo || hasFlag("--mock-model") || model === "mock-agent";
@@ -36,6 +36,19 @@ export function parseArgs(argv: string[]): BenchmarkConfig {
     seed: parseInteger(getValue("--seed"), 42),
     pricingPath: getValue("--pricing") ?? "./pricing.json",
     memongoBaseUrl: getValue("--memongo-base-url") ?? process.env.MEMONGO_BASE_URL,
+    memongoApiKey: getValue("--memongo-api-key") ?? process.env.MEMONGO_API_KEY,
+    memongoEnrichmentMode:
+      getValue("--memongo-enrichment-mode") ?? process.env.MEMONGO_LLM_ENRICHMENT_MODE,
+    memongoEnrichmentModel:
+      getValue("--memongo-enrichment-model") ?? process.env.MEMONGO_ENRICHMENT_MODEL,
+    memongoRepo:
+      getValue("--memongo-repo") ??
+      process.env.MEMONGO_REPO ??
+      "https://github.com/romiluz13/Memongo",
+    memongoCommit: getValue("--memongo-commit") ?? process.env.MEMONGO_COMMIT,
+    memongoQueryDecompositionMode:
+      getValue("--memongo-query-decomposition-mode") ??
+      process.env.MEMONGO_QUERY_DECOMPOSITION_MODE,
     mongodbUri:
       getValue("--mongodb-uri") ??
       process.env.MONGODB_URI ??
@@ -74,6 +87,11 @@ export function requireLiveModelConfig(config: BenchmarkConfig): void {
   if (!config.groveApiKey) {
     throw new Error("GROVE_API_KEY is required unless demo mode or --mock-model is used.");
   }
+  if (config.backends.some(isMemongoBackend) && !config.memongoBaseUrl) {
+    throw new Error(
+      "MEMONGO_BASE_URL or --memongo-base-url is required for memongo-context/memongo-search.",
+    );
+  }
 }
 
 function parseBackends(value: string): BackendId[] {
@@ -81,11 +99,20 @@ function parseBackends(value: string): BackendId[] {
     .split(",")
     .map((entry) => entry.trim())
     .filter(Boolean);
-  const valid = new Set(["filesystem", "mongodb"]);
+  const valid = new Set(["filesystem", "memongo-context", "memongo-search", "mongodb-text"]);
   for (const id of ids) {
+    if (id === "mongodb") {
+      throw new Error(
+        "Backend 'mongodb' is ambiguous. Use memongo-context, memongo-search, or mongodb-text.",
+      );
+    }
     if (!valid.has(id)) throw new Error(`Unsupported backend: ${id}`);
   }
   return ids as BackendId[];
+}
+
+function isMemongoBackend(backend: BackendId): boolean {
+  return backend === "memongo-context" || backend === "memongo-search";
 }
 
 function parseNumberList(value: string | undefined, fallback: number[]): number[] {

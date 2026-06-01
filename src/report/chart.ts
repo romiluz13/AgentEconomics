@@ -88,8 +88,8 @@ export function renderCostWaterfallSvg(rows: OutcomeAttribution[]): string {
 
 export function renderTraceComparisonSvg(events: TraceEvent[]): string {
   const width = 760;
-  const height = 360;
-  const backends = ["filesystem", "mongodb"] as const;
+  const backends = [...new Set(events.map((event) => event.backend).filter(Boolean))];
+  const height = Math.max(260, 90 + backends.length * 110);
   const rows = backends.map((backend) => ({
     backend,
     modelTurns: events.filter((event) => event.backend === backend && event.kind === "model")
@@ -110,9 +110,8 @@ export function renderTraceComparisonSvg(events: TraceEvent[]): string {
       row.retrievedTokens / 100,
     ]),
   );
-  const yPositions = [88, 180];
   const blocks = rows.flatMap((row, rowIndex) => {
-    const y = yPositions[rowIndex] ?? 88;
+    const y = 88 + rowIndex * 110;
     return [
       `<text x="40" y="${y}" font-size="14">${row.backend}</text>`,
       metricBar("model turns", row.modelTurns, max, 190, y - 20),

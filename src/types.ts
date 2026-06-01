@@ -1,4 +1,4 @@
-export type BackendId = "filesystem" | "mongodb";
+export type BackendId = "filesystem" | "memongo-context" | "memongo-search" | "mongodb-text";
 
 export type TraceKind = "model" | "tool" | "retrieval" | "judge" | "retry" | "setup";
 
@@ -141,6 +141,12 @@ export interface BenchmarkConfig {
   seed: number;
   pricingPath: string;
   memongoBaseUrl?: string;
+  memongoApiKey?: string;
+  memongoEnrichmentMode?: string;
+  memongoEnrichmentModel?: string;
+  memongoRepo?: string;
+  memongoCommit?: string;
+  memongoQueryDecompositionMode?: string;
   mongodbUri: string;
   groveBaseUrl: string;
   groveApiKey?: string;

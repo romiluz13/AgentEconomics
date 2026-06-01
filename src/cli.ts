@@ -9,9 +9,11 @@ import {
   type RunManifest,
   type TasksetArtifact,
 } from "./artifacts/manifest";
+import { collectMemongoProvenance } from "./artifacts/memongo-provenance";
 import { publicConfig, writePublicArtifacts } from "./artifacts/redaction";
 import { FilesystemBackend } from "./backends/filesystem";
-import { MongoDbBackend } from "./backends/mongodb";
+import { MemongoBackend } from "./backends/memongo";
+import { MongoDbTextBackend } from "./backends/mongodb";
 import type { Backend } from "./backends/types";
 import { parseArgs, requireLiveModelConfig } from "./config";
 import { loadPricing } from "./cost/pricing";
@@ -65,6 +67,7 @@ export async function main(argv = Bun.argv.slice(2)): Promise<void> {
   await mkdir(publicLatestDir, { recursive: true });
 
   const failures: FailureRecord[] = [];
+  const memongoProvenance = await collectMemongoProvenance(config);
   const taskset = createTasksetArtifact(config.runId, config.seed, tasks);
   const dryRunEstimate = estimateBenchmarkCost({ config, entries, tasks, pricing });
   await writeJson(resolve(artifactDir, "dry-run-estimate.json"), dryRunEstimate);
@@ -147,6 +150,7 @@ export async function main(argv = Bun.argv.slice(2)): Promise<void> {
       pricingPath: resolvedPricingPath,
       startedAt,
       failures,
+      memongo: memongoProvenance,
     }),
     new Date().toISOString(),
   );
@@ -172,9 +176,19 @@ function createBackend(
   pricing: PricingTable,
 ): Backend {
   if (backendId === "filesystem") return new FilesystemBackend();
-  return new MongoDbBackend({
-    memongoBaseUrl: config.memongoBaseUrl,
-    mongodbUri: config.mongodbUri,
+  if (backendId === "mongodb-text") {
+    return new MongoDbTextBackend({
+      mongodbUri: config.mongodbUri,
+      pricing,
+    });
+  }
+  if (!config.memongoBaseUrl) {
+    throw new Error(`${backendId} requires --memongo-base-url or MEMONGO_BASE_URL.`);
+  }
+  return new MemongoBackend({
+    id: backendId,
+    baseUrl: config.memongoBaseUrl,
+    apiKey: config.memongoApiKey,
     pricing,
   });
 }
@@ -304,10 +318,10 @@ export function helpText(): string {
     "",
     "Usage:",
     "  bun run src/cli.ts demo",
-    "  bun run src/cli.ts -- --backend filesystem,mongodb --dataset ./longmemeval_s_cleaned.json",
+    "  bun run src/cli.ts -- --backend filesystem,memongo-context --dataset ./longmemeval_s_cleaned.json",
     "",
     "Options:",
-    "  --backend filesystem,mongodb",
+    "  --backend filesystem,memongo-context,memongo-search,mongodb-text",
     "  --sizes 10,50,100,300,500",
     "  --tasks 20",
     "  --repetitions 3",
@@ -322,6 +336,12 @@ export function helpText(): string {
     "  --seed 42",
     "  --pricing ./pricing.json",
     "  --memongo-base-url http://127.0.0.1:3847",
+    "  --memongo-api-key env-or-literal-key",
+    "  --memongo-enrichment-mode enabled",
+    "  --memongo-enrichment-model DeepSeek-V4-Pro",
+    "  --memongo-query-decomposition-mode enabled",
+    "  --memongo-repo https://github.com/romiluz13/Memongo",
+    "  --memongo-commit pinned-memongo-commit",
     "  --mongodb-uri mongodb://127.0.0.1:27017/agent-economics",
     "  --grove-base-url https://grove-gateway-prod.azure-api.net/grove-foundry-prod/openai/v1",
     "  --grove-auth-header api-key",

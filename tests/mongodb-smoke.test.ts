@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { createMockChatProvider } from "../src/agent/grove";
 import { runAgentLoop } from "../src/agent/loop";
-import { MongoDbBackend } from "../src/backends/mongodb";
+import { MemongoBackend } from "../src/backends/memongo";
 import { buildCorpus, selectStratifiedTasks } from "../src/dataset/corpus";
 import { parseLongMemEval } from "../src/dataset/longmemeval";
 import { judgeAnswer } from "../src/judge/judge";
@@ -20,11 +20,15 @@ const server = Bun.serve({
     if (url.pathname === "/v1/write-event") {
       const agentId = String(body.agentId);
       const current = memories.get(agentId) ?? [];
-      current.push(String(body.content ?? ""));
+      current.push(String(body.body ?? ""));
       memories.set(agentId, current);
       return Response.json({ ok: true });
     }
     if (url.pathname === "/v1/sync") return Response.json({ ok: true });
+    if (url.pathname === "/v1/context-bundle") {
+      const agentId = String(body.agentId);
+      return Response.json({ rendered: (memories.get(agentId) ?? []).join("\n") });
+    }
     if (url.pathname === "/v1/search-detailed") {
       const agentId = String(body.agentId);
       const query = String(body.query ?? "").toLowerCase();
@@ -50,8 +54,8 @@ const pricing: PricingTable = {
   voyageEmbedPerMTok: 0.1,
 };
 
-describe("mongodb backend smoke", () => {
-  test("runs a task through memongo-compatible HTTP endpoints", async () => {
+describe("memongo backend smoke", () => {
+  test("runs a task through memongo context endpoints", async () => {
     const fixture = await Bun.file("tests/fixtures/synthetic-longmemeval.json").json();
     const entries = parseLongMemEval(fixture);
     const tasks = selectStratifiedTasks(entries, 1, 3);
@@ -59,14 +63,14 @@ describe("mongodb backend smoke", () => {
     if (!task) throw new Error("Expected at least one selected task.");
 
     const corpus = buildCorpus(entries, tasks, 3, 3);
-    const backend = new MongoDbBackend({
-      memongoBaseUrl: server.url.href,
-      mongodbUri: "mongodb://127.0.0.1:27017/agent-economics-test",
+    const backend = new MemongoBackend({
+      id: "memongo-context",
+      baseUrl: server.url.href,
       pricing,
     });
     const context = await backend.setup(corpus);
     const loop = await runAgentLoop({
-      backend: "mongodb",
+      backend: "memongo-context",
       task,
       tools: context.tools,
       provider: createMockChatProvider(task),
