@@ -1,0 +1,163 @@
+{
+  "runId": "longmem-final-gpt55",
+  "seed": 42,
+  "taskCount": 20,
+  "tasks": [
+    {
+      "taskId": "cc5ded98",
+      "questionType": "knowledge-update",
+      "answerSessionIds": [
+        "answer_a5b68517_1",
+        "answer_a5b68517_2"
+      ]
+    },
+    {
+      "taskId": "2ce6a0f2",
+      "questionType": "multi-session",
+      "answerSessionIds": [
+        "answer_901a6763_2",
+        "answer_901a6763_4",
+        "answer_901a6763_1",
+        "answer_901a6763_3"
+      ]
+    },
+    {
+      "taskId": "e982271f",
+      "questionType": "single-session-assistant",
+      "answerSessionIds": [
+        "answer_ultrachat_195444"
+      ]
+    },
+    {
+      "taskId": "35a27287",
+      "questionType": "single-session-preference",
+      "answerSessionIds": [
+        "answer_9b182436"
+      ]
+    },
+    {
+      "taskId": "1e043500",
+      "questionType": "single-session-user",
+      "answerSessionIds": [
+        "answer_3e012175"
+      ]
+    },
+    {
+      "taskId": "2ebe6c90",
+      "questionType": "temporal-reasoning",
+      "answerSessionIds": [
+        "answer_c9d35c00_1",
+        "answer_c9d35c00_2"
+      ]
+    },
+    {
+      "taskId": "72e3ee87",
+      "questionType": "knowledge-update",
+      "answerSessionIds": [
+        "answer_d7de9a6a_1",
+        "answer_d7de9a6a_2"
+      ]
+    },
+    {
+      "taskId": "gpt4_f2262a51",
+      "questionType": "multi-session",
+      "answerSessionIds": [
+        "answer_55a6940c_3",
+        "answer_55a6940c_1",
+        "answer_55a6940c_2"
+      ]
+    },
+    {
+      "taskId": "65240037",
+      "questionType": "single-session-assistant",
+      "answerSessionIds": [
+        "answer_ultrachat_403752"
+      ]
+    },
+    {
+      "taskId": "1d4e3b97",
+      "questionType": "single-session-preference",
+      "answerSessionIds": [
+        "answer_e6b6353d"
+      ]
+    },
+    {
+      "taskId": "6ade9755",
+      "questionType": "single-session-user",
+      "answerSessionIds": [
+        "answer_9398da02"
+      ]
+    },
+    {
+      "taskId": "gpt4_b5700ca9",
+      "questionType": "temporal-reasoning",
+      "answerSessionIds": [
+        "answer_a17423e7_1"
+      ]
+    },
+    {
+      "taskId": "5a4f22c0",
+      "questionType": "knowledge-update",
+      "answerSessionIds": [
+        "answer_b0f3dfff_1",
+        "answer_b0f3dfff_2"
+      ]
+    },
+    {
+      "taskId": "b5ef892d",
+      "questionType": "multi-session",
+      "answerSessionIds": [
+        "answer_a8b4290f_3",
+        "answer_a8b4290f_1",
+        "answer_a8b4290f_2"
+      ]
+    },
+    {
+      "taskId": "7161e7e2",
+      "questionType": "single-session-assistant",
+      "answerSessionIds": [
+        "answer_sharegpt_5Lzox6N_0"
+      ]
+    },
+    {
+      "taskId": "75832dbd",
+      "questionType": "single-session-preference",
+      "answerSessionIds": [
+        "answer_d87a6ef8"
+      ]
+    },
+    {
+      "taskId": "58ef2f1c",
+      "questionType": "single-session-user",
+      "answerSessionIds": [
+        "answer_59547700"
+      ]
+    },
+    {
+      "taskId": "b46e15ed",
+      "questionType": "temporal-reasoning",
+      "answerSessionIds": [
+        "answer_4bfcc250_4",
+        "answer_4bfcc250_3",
+        "answer_4bfcc250_2",
+        "answer_4bfcc250_1"
+      ]
+    },
+    {
+      "taskId": "e61a7584",
+      "questionType": "knowledge-update",
+      "answerSessionIds": [
+        "answer_f25c32f5_1",
+        "answer_f25c32f5_2"
+      ]
+    },
+    {
+      "taskId": "6cb6f249",
+      "questionType": "multi-session",
+      "answerSessionIds": [
+        "answer_a4204937_2",
+        "answer_a4204937_1"
+      ]
+    }
+  ]
+}

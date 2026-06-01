@@ -1,0 +1,28 @@
+{
+  "currency": "USD",
+  "asOf": "2026-06-01",
+  "notes": "Example pricing for benchmark reproducibility. Replace with your provider contract rates before publishing claims.",
+  "models": {
+    "gpt-5.4": {
+      "inputPerMTok": 5,
+      "outputPerMTok": 15
+    },
+    "gpt-5.5": {
+      "inputPerMTok": 5,
+      "outputPerMTok": 30
+    },
+    "gpt-4.1": {
+      "inputPerMTok": 2,
+      "outputPerMTok": 8
+    },
+    "DeepSeek-V4-Pro": {
+      "inputPerMTok": 0.435,
+      "outputPerMTok": 0.87
+    },
+    "mock-agent": {
+      "inputPerMTok": 0,
+      "outputPerMTok": 0
+    }
+  },
+  "voyageEmbedPerMTok": 0.12
+}

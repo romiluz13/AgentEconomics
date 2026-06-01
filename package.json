@@ -1,0 +1,23 @@
+{
+  "name": "agent-economics",
+  "version": "0.1.0",
+  "description": "Token-to-outcome attribution for AI agents.",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "bun@1.3.13",
+  "scripts": {
+    "benchmark": "bun run src/cli.ts",
+    "demo": "bun run src/cli.ts demo",
+    "test": "bun test",
+    "typecheck": "bunx tsc --noEmit",
+    "lint": "bunx biome check ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "latest",
+    "@types/bun": "^1.3.14",
+    "typescript": "latest"
+  },
+  "dependencies": {
+    "mongodb": "^7.2.0"
+  }
+}

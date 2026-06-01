@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 420" role="img" aria-label="Cost per task versus corpus size">
+<rect width="720" height="420" fill="white" />
+<g color="black" font-family="Arial, sans-serif">
+<line x1="56" y1="364" x2="664" y2="364" stroke="currentColor" />
+<line x1="56" y1="56" x2="56" y2="364" stroke="currentColor" />
+<text x="280" y="404" font-size="13">Corpus size (sessions)</text>
+<text x="16" y="36" font-size="13">Mean cost per task</text>
+<polyline fill="none" stroke="currentColor" stroke-width="2" points="99.776,316.39612760077654 116.80000000000001,314.71834154970924 177.60000000000002,286.95295926959625 420.8,188.5855011156446 664,56" />
+<polyline fill="none" stroke="currentColor" stroke-width="2" points="99.776,352.8628906318322 116.80000000000001,351.884655074622 177.60000000000002,352.5573984446771 420.8,350.2286097292219 664,352.40072427374815" />
+<text x="99.776" y="308.39612760077654" font-size="11">filesystem $0.12371</text>
+<text x="99.776" y="344.8628906318322" font-size="11">mongodb $0.02894</text>
+<text x="116.80000000000001" y="306.71834154970924" font-size="11">filesystem $0.12807</text>
+<text x="116.80000000000001" y="343.884655074622" font-size="11">mongodb $0.03149</text>
+<text x="177.60000000000002" y="278.95295926959625" font-size="11">filesystem $0.20023</text>
+<text x="177.60000000000002" y="344.5573984446771" font-size="11">mongodb $0.02974</text>
+<text x="420.8" y="180.5855011156446" font-size="11">filesystem $0.45587</text>
+<text x="420.8" y="342.2286097292219" font-size="11">mongodb $0.03579</text>
+<text x="664" y="48" font-size="11">filesystem $0.80043</text>
+<text x="664" y="344.40072427374815" font-size="11">mongodb $0.03014</text>
+</g>
+</svg>

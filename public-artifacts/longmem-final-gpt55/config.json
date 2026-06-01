@@ -1,0 +1,33 @@
+{
+  "backends": [
+    "filesystem",
+    "mongodb"
+  ],
+  "sizes": [
+    10,
+    50,
+    100,
+    300,
+    500
+  ],
+  "tasks": 20,
+  "repetitions": 3,
+  "maxCostUsd": 250,
+  "dryRunEstimate": false,
+  "model": "gpt-5.5",
+  "judgeModel": "gpt-5.5",
+  "loopBudget": 10,
+  "outDir": "./artifacts",
+  "runId": "longmem-final-gpt55",
+  "seed": 42,
+  "pricingPath": "./pricing.json",
+  "groveAuthHeader": "api-key",
+  "groveApiMode": "responses",
+  "demo": false,
+  "mockModel": false,
+  "datasetPathConfigured": true,
+  "groveApiKeyConfigured": true,
+  "groveBaseUrlConfigured": true,
+  "memongoBaseUrlConfigured": false,
+  "mongodbUriConfigured": true
+}

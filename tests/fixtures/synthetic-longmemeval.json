@@ -1,0 +1,78 @@
+[
+  {
+    "question_id": "synthetic-1",
+    "question_type": "profile_fact",
+    "question": "What city did Alice move to?",
+    "answer": "Berlin",
+    "answer_session_ids": ["alice-move"],
+    "sessions": [
+      {
+        "session_id": "alice-move",
+        "turns": [
+          {
+            "role": "user",
+            "content": "Alice said she moved to Berlin after finishing the database migration project."
+          },
+          {
+            "role": "assistant",
+            "content": "Noted that Alice's new city is Berlin."
+          }
+        ]
+      },
+      {
+        "session_id": "distractor-food",
+        "turns": [
+          {
+            "role": "user",
+            "content": "Marco prefers ramen for lunch on Fridays."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "synthetic-2",
+    "question_type": "preference",
+    "question": "Which database does Nia prefer for operational AI memory?",
+    "answer": "MongoDB",
+    "answer_session_ids": ["nia-db"],
+    "sessions": [
+      {
+        "session_id": "nia-db",
+        "turns": [
+          {
+            "role": "user",
+            "content": "Nia prefers MongoDB for operational AI memory because metadata and vectors live together."
+          }
+        ]
+      },
+      {
+        "session_id": "distractor-travel",
+        "turns": [
+          {
+            "role": "assistant",
+            "content": "The team offsite is planned for Lisbon."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "question_id": "synthetic-3",
+    "question_type": "project_fact",
+    "question": "What benchmark metric did Omar call the north star?",
+    "answer": "cost per correct completed outcome",
+    "answer_session_ids": ["omar-metric"],
+    "sessions": [
+      {
+        "session_id": "omar-metric",
+        "turns": [
+          {
+            "role": "user",
+            "content": "Omar called cost per correct completed outcome the north star metric for the benchmark."
+          }
+        ]
+      }
+    ]
+  }
+]

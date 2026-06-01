@@ -1,0 +1,96 @@
+{
+  "runId": "longmem-final-gpt55",
+  "startedAt": "2026-05-31T23:09:55.088Z",
+  "command": [
+    "--backend",
+    "filesystem,mongodb",
+    "--sizes",
+    "10,50,100,300,500",
+    "--tasks",
+    "20",
+    "--repetitions",
+    "3",
+    "--model",
+    "gpt-5.5",
+    "--judge-model",
+    "gpt-5.5",
+    "--grove-api-mode",
+    "responses",
+    "--grove-auth-header",
+    "api-key",
+    "--loop-budget",
+    "10",
+    "--dataset",
+    "[local dataset path redacted]",
+    "--max-cost-usd",
+    "250",
+    "--run-id",
+    "longmem-final-gpt55"
+  ],
+  "environment": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "bunVersion": "1.3.13",
+    "nodeVersion": "v24.3.0"
+  },
+  "git": {
+    "commit": null,
+    "dirty": null
+  },
+  "docker": {
+    "expectedMongoImage": "mongo:7",
+    "mongoImageDigest": "mongo@sha256:4b5bf3c2bb7516164f6dcb44acce4fdcb428abfe5771a1128304a0f34ab9ff7c"
+  },
+  "dataset": {
+    "path": "[local dataset path redacted]",
+    "sha256": "d6f21ea9d60a0d56f34a05b609c79c88a451d2ae03597821ea3d5a9678c3a442"
+  },
+  "pricing": {
+    "path": "pricing.json",
+    "sha256": "087816fe98c461fb8911ed65e9173ce85a44ff1444fa0375e67917e070064686"
+  },
+  "benchmark": {
+    "model": "gpt-5.5",
+    "judgeModel": "gpt-5.5",
+    "groveApiMode": "responses",
+    "groveAuthHeader": "api-key",
+    "store": false,
+    "seed": 42,
+    "sizes": [
+      10,
+      50,
+      100,
+      300,
+      500
+    ],
+    "tasks": 20,
+    "repetitions": 3,
+    "loopBudget": 10,
+    "backends": [
+      "filesystem",
+      "mongodb"
+    ],
+    "maxCostUsd": 250
+  },
+  "failures": [
+    {
+      "kind": "model_failure",
+      "backend": "filesystem",
+      "corpusSize": 100,
+      "taskId": "b46e15ed",
+      "repetition": 3,
+      "message": "The operation timed out.",
+      "timestamp": "2026-06-01T00:08:59.284Z"
+    },
+    {
+      "kind": "model_failure",
+      "backend": "mongodb",
+      "corpusSize": 100,
+      "taskId": "35a27287",
+      "repetition": 2,
+      "message": "The operation timed out.",
+      "timestamp": "2026-06-01T00:14:48.427Z"
+    }
+  ],
+  "finishedAt": "2026-06-01T01:15:58.910Z"
+}
