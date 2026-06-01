@@ -1,30 +1,81 @@
 # AgentEconomics
 
-`AgentEconomics` is a TypeScript/Bun benchmark for token-to-outcome attribution in AI
-agents. It measures how retrieval, retries, context, and model choice change the cost of
-correct agent outcomes.
+**Same agent. Same model. Same tasks. Different memory architecture.**
 
-The primary benchmark compares filesystem context management with memongo:
+Agent builders feel memory quality first. Finance feels the bill later. `AgentEconomics` connects the two: it measures how context management changes the cost of a correct agent outcome.
 
-- `filesystem`: materializes sessions as Markdown and gives the agent `list_files`,
-  `grep_files`, and `read_file` tools.
-- `memongo-context`: talks to an external pinned memongo sidecar via
-  `MEMONGO_BASE_URL` and uses `/v1/context-bundle` as the prompt-ready context
-  surface.
-- `memongo-search`: diagnostic memongo `/v1/search-detailed` lane.
-- `mongodb-text`: diagnostic naive direct MongoDB classic text-index baseline.
+The question:
+
+> When an agent's memory grows, does filesystem context stay cheap, or does it become hidden token drag?
+
+## Headline Results
+
+Best balanced point, `N=100`:
+
+| Metric | Filesystem | memongo-context | Result |
+|---|---:|---:|---:|
+| Accuracy | 68.3% | 63.3% | -5.0 pp |
+| Cost per correct answer | $0.313525 | $0.066253 | 4.7x cheaper |
+| Mean input tokens / task | 40,804 | 7,099 | 82.6% fewer |
+| p50 latency | 9.3s | 6.5s | faster |
+
+Scaling cliff, `N=500`:
+
+| Metric | Filesystem | memongo-context | Result |
+|---|---:|---:|---:|
+| Mean cost / task | $0.689078 | $0.048234 | 14.29x cheaper |
+| Cost per correct answer | $1.060120 | $0.099794 | 10.6x cheaper |
+| Mean input tokens / task | 134,705 | 8,074 | 126,631 fewer |
+| Accuracy | 65.0% | 48.3% | -16.7 pp |
+
+**A real memory layer can buy back huge amounts of context budget. In this run, memongo reduced input-token load by up to 94% and reduced cost per correct answer by 4.7x at the best balanced point, while exposing where recall quality still needs tuning.**
+
+## Visual Proof
+
+![Scaling cliff](public-artifacts/latest/scaling-cliff.svg)
+
+![Cost waterfall](public-artifacts/latest/cost-waterfall.svg)
+
+![Trace comparison](public-artifacts/latest/trace-comparison.svg)
+
+## Why Agent Builders Should Care
+
+Filesystem memory feels great in the prototype phase:
+
+- grep a few Markdown files
+- read a whole session
+- let the model sort it out
+
+That works until the corpus grows. Then the agent starts paying for memory by dragging more text through every reasoning loop.
+
+`memongo-context` changes the shape of the system. It gives the agent a purpose-built context surface backed by MongoDB-native memory, instead of a pile of files. The result is not just fewer tokens. It is a different economic profile for the same workflow.
+
+## What This Proves
+
+- Filesystem context has a visible scaling cliff.
+- Memory architecture changes cost per correct outcome, not just raw token count.
+- At `N=100`, memongo was close on quality and far cheaper per correct answer.
+- At `N=500`, memongo made token spend dramatically smaller, but still trailed on accuracy.
+
+## What This Does Not Prove
+
+- It does not prove memongo is always more accurate than files.
+- It does not prove every MongoDB retrieval design is good. The diagnostic `mongodb-text` baseline was cheap but weak.
+- It does not include the provider cost of memongo's internal enrichment and query decomposition model in the agent+judge spend total. That configuration is recorded in the run manifest and should be priced separately for production ROI.
+
+## Benchmark Design
+
+The primary benchmark compares:
+
+- `filesystem`: materializes sessions as Markdown and gives the agent `list_files`, `grep_files`, and `read_file` tools.
+- `memongo-context`: talks to an external memongo sidecar via `MEMONGO_BASE_URL` and uses `/v1/context-bundle` as the prompt-ready context surface.
+
+Diagnostic lanes:
+
+- `memongo-search`: memongo `/v1/search-detailed`.
+- `mongodb-text`: naive direct MongoDB classic text-index retrieval.
 
 The benchmark does not import, build, edit, or mutate any memongo source checkout.
-
-## Final Run Snapshot
-
-The previous `longmem-final-gpt55` result compared filesystem against `mongodb-text`,
-not memongo. It remains useful as a cautionary baseline: naive text indexing is cheap,
-but it is not a state-of-the-art memory system.
-
-The next publishable headline run should compare `filesystem` against
-`memongo-context`, with memongo pinned as an external sidecar. Do not present
-`mongodb-text` as “MongoDB memory” or as a memongo result.
 
 ## Quickstart
 
